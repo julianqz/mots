@@ -217,16 +217,18 @@ def genderQuizMain(csvname, size=None):
 	wordList = wordInfo[2]
 	posList = wordInfo[3]
 
-	# random sampling
-	lenList = len(wordList)
+	# index of words that are or can be nouns
+	nounIdx = [idx for idx in range(len(posList)) if "n" in posList[idx] and posList[idx]!="conj"]
 
+	# random sampling
+	# only nouns are sampled
 	if size is not None:
 		try:
-			idx = sample(list(range(lenList)), k=size)
-			wordList = [wordList[i] for i in idx]
-			posList = [posList[i] for i in idx]
+			randIdx = sample(list(nounIdx), k=size)
+			wordList = [wordList[i] for i in randIdx]
+			posList = [posList[i] for i in randIdx]
 		except:
-			print("size must be >0 & <= {0}".format(lenList))
+			print("size must be >0 & <= {0}".format(len(nounIdx)))
 			return
 
 	# run quiz through list
@@ -238,6 +240,7 @@ def genderQuizMain(csvname, size=None):
 # number of words actually on the quiz could be smaller than size
 # this is because non-nouns and nouns with no gender info are omitted
 genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+#genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
 
 # for testing
