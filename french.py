@@ -179,10 +179,10 @@ def parseMeaning(toParse):
         # +: to match 1 or more repetitions of the preceding RE
         # \w: matches Unicode word characters; this includes most characters that can be part 
         #     of a word in any language, as well as numbers and the underscore
-        parsedWithCurly = re.findall("{[\w\s,;]+}", toParse)
+        parsedWithCurly = re.findall("{[\w\s,;-]+}", toParse)
         
         # within each {}, remove {}
-        parsedWithoutCurly = [re.search("[\w\s,;]+", item)[0] for item in parsedWithCurly]
+        parsedWithoutCurly = [re.search("[\w\s,;-]+", item)[0] for item in parsedWithCurly]
         
         return parsedWithoutCurly
     else:
@@ -246,7 +246,10 @@ def formatPOSnMean(posStr, meanStr, maskGender):
 def displayWord(wordInfo, maskGender, freq, phrases, related, register):
     
     # word [freq]
-    print(wordInfo[CSV_COL_N_WORD] + " #"*freq + wordInfo[CSV_COL_N_FREQ]*freq)
+    if freq and len(wordInfo[CSV_COL_N_FREQ])>0:
+    	print(wordInfo[CSV_COL_N_WORD] + " #" + wordInfo[CSV_COL_N_FREQ])
+    else:
+    	print(wordInfo[CSV_COL_N_WORD])
 
     # variation
     # only print if not "" (otherwise it'd look like there's a blank line)
