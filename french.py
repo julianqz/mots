@@ -8,24 +8,24 @@ CSV_PATH = "/Users/jkewz/Desktop/fr/"
 CSV_FILENAME = "mots.csv"
 
 CSV_COL_FREQ = "frequency_rank"
-CSV_COL_NA = "noun_article"
+CSV_COL_NA   = "noun_article"
 CSV_COL_WORD = "word"
-CSV_COL_POS = "part_of_speech"
-CSV_COL_VAR = "variation"
+CSV_COL_POS  = "part_of_speech"
+CSV_COL_VAR  = "variation"
 CSV_COL_MEAN = "meaning"
-CSV_COL_PHR = "phrases"
-CSV_COL_REL = "related"
-CSV_COL_REG = "register"
+CSV_COL_PHR  = "phrases"
+CSV_COL_REL  = "related"
+CSV_COL_REG  = "register"
 
 CSV_COL_N_FREQ = 0
-CSV_COL_N_NA = 1
+CSV_COL_N_NA   = 1
 CSV_COL_N_WORD = 2
-CSV_COL_N_POS = 3
-CSV_COL_N_VAR = 4
+CSV_COL_N_POS  = 3
+CSV_COL_N_VAR  = 4
 CSV_COL_N_MEAN = 5
-CSV_COL_N_PHR = 6
-CSV_COL_N_REL = 7
-CSV_COL_N_REG = 8
+CSV_COL_N_PHR  = 6
+CSV_COL_N_REL  = 7
+CSV_COL_N_REG  = 8
 
 LEGAL_NOUN_POS = ("nm", "nf", "nm/nf", "nmpl", "nfpl", "nm/nf pl", "nmi", "nfi")
 LEGAL_GENDER_INPUTS = ("m", "f", "mf", "mpl", "fpl", "mfpl", "mi", "fi")
@@ -375,8 +375,6 @@ def genderQuizMain(csvname, size=None):
 
 
 # run
-# number of words actually on the quiz could be smaller than size
-# this is because non-nouns and nouns with no gender info are omitted
 genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
@@ -399,3 +397,7 @@ genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizWordList(wL[0:3], pL[0:4])
 
 #print(formatAnswer(["m","f", "mf", "mpl", "fpl", "mfpl"]))
+
+#formatPOSnMean("adj", "bright; blue", True)
+#formatPOSnMean("adj; nm", "{bright; blue}; {brightness; blue}", True)
+#formatPOSnMean("adj; nm", "{bright; blue}; {brightness; blue}", False)
