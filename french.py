@@ -1,4 +1,5 @@
 import csv
+import re
 from random import sample
 
 # meta parameters
@@ -98,7 +99,7 @@ def formatAnswer(genderTruth):
 
 # given noun and its true gender(s) in a list
 # solicit and assess user input of gender(s)
-def genderQuizSingleWord(quizWord, genderTruth):
+def genderQuizSingleWord(quizWord, genderTruth, meaning):
 
 	# set max number of failures allowed
 	remainingTrials = 3
@@ -106,6 +107,10 @@ def genderQuizSingleWord(quizWord, genderTruth):
 	# print word
 	print("* * * * * * * * * * * * * * * * * *")
 	print("Quiz word: " + quizWord)
+
+	# TODO: display information about the word
+	print(meaning)
+	# TODO: play pronuncation of the word (optional?)
 
 	while remainingTrials > 0:
 		remainingTrials -=1
@@ -168,10 +173,37 @@ def parseNounGender(pos, verbose=False):
 	#print(genderList)
 	return genderList
 
+
+# parse through a string containing the word meaning for each of its POS
+
+# most generic description of the kind of pattern to parse: "{;;}; {;;}; {;;}"
+# examples & desired parsed outcome:
+#   population -> ["population"]
+#   ball; bullet -> ["ball; bullet"]
+#   {blue}; {blue; bruise} -> ["blue", "blue; bruise"]
+
+# toParse: a string that may or may not contain pair(s) of {}
+# returns a list; no. of entries in list depends on no. of pairs of {} (1 entry if no {})
+def parseMeaning(toParse):
+    
+    if "{" in toParse:
+        # separate {}'s by semi-colon
+        # +: to match 1 or more repetitions of the preceding RE
+        # \w: matches Unicode word characters; this includes most characters that can be part 
+        #     of a word in any language, as well as numbers and the underscore
+        parsedWithCurly = re.findall("{[\w\s,;]+}", toParse)
+        
+        # within each {}, remove {}
+        parsedWithoutCurly = [re.search("[\w\s,;]+", item)[0] for item in parsedWithCurly]
+        
+        return parsedWithoutCurly
+    else:
+        return [toParse]
+
 # given a list of words and their corresponding POS
 # each word is a string; each POS is a string too
 # run gender quiz for nouns for which gender info is available in their POS
-def genderQuizWordList(wordList, posList):
+def genderQuizWordList(wordList, posList, meanList):
 
 	# check lens match
 	if len(wordList)!=len(posList):
@@ -180,9 +212,10 @@ def genderQuizWordList(wordList, posList):
 
 	for i in range(len(wordList)):
 		pos = parseNounGender(posList[i], verbose=False)
+		mean = parseMeaning(meanList[i])
 		#print(type(pos))
 		if pos is not None:
-			genderQuizSingleWord(wordList[i], pos)
+			genderQuizSingleWord(wordList[i], pos, mean)
 
 # given a csv, generate:
 # a nested list
@@ -214,26 +247,30 @@ def genderQuizMain(csvname, size=None):
 
 	# get wordList and posList
 	wordInfo = getWordInfofromCSV(csvname)
-	wordList = wordInfo[2]
-	posList = wordInfo[3]
+	lstWord = wordInfo[2]
+	lstPos  = wordInfo[3]
+	lstMean = wordInfo[5]
 
 	# index of words that are or can be nouns
-	nounIdx = [idx for idx in range(len(posList)) if "n" in posList[idx] and posList[idx]!="conj"]
+	# noun if POS isn't "conj" and POS contains "n"
+	# ASSUMPTION: a word won't be both conj and a noun at the same time
+	nounIdx = [idx for idx in range(len(lstPos)) if "n" in lstPos[idx] and lstPos[idx]!="conj"]
 
 	# random sampling
 	# only nouns are sampled
 	if size is not None:
 		try:
 			randIdx = sample(list(nounIdx), k=size)
-			wordList = [wordList[i] for i in randIdx]
-			posList = [posList[i] for i in randIdx]
+			lstWord = [lstWord[i] for i in randIdx]
+			lstPos  = [lstPos[i] for i in randIdx]
+			lstMean = [lstMean[i] for i in randIdx]
 		except:
 			print("size must be >0 & <= {0}".format(len(nounIdx)))
 			return
 
 	# run quiz through list
 	printInputInfo()
-	genderQuizWordList(wordList, posList)
+	genderQuizWordList(lstWord, lstPos, lstMean)
 
 
 # run
