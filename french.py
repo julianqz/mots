@@ -108,16 +108,25 @@ def formatAnswer(genderTruth):
 	return answer
 
 
-# parse through parts of speech of a noun to produce a list of gender(s)
-# if input contains irregular format, a msg will be printed and None returned
-def parseNounGender(pos, verbose=False):
-
-	pos = pos.lower()
+# posStr: a string, like "nm", "adj; nm/nf"
+# returns a list
+def parsePos(posStr):
+	
+	posStr = posStr.lower()
 
 	# split by semi-colon
-	posList = pos.split("; ")
+	posList = posStr.split("; ")
 
-    # keep only pos starting with "n" and of length >1
+	return posList
+
+
+# parse through parts of speech of a noun to produce a list of gender(s)
+# if input contains irregular format, a msg will be printed and None returned
+def parseNounGender(posStr, verbose=False):
+
+	posList = parsePos(posStr)
+
+    # keep only pos starting with "n" (thereby excluding "conj") and of length >1
     # "n" (e.g. Londres), for which gender info is unavail., is excluded
 	posList = [item for item in posList if item[0]=="n" and len(item)>1]
 
@@ -179,6 +188,87 @@ def parseMeaning(toParse):
     else:
         return [toParse]
 
+
+# posStr: a string of POS(s); like "nm", "adj; nm/nf"
+# meanStr: a string of meaning(s); like "blue", "bright; shiny", "{bright}; {blue}"
+# maskGender: boolean value; if True, mask gender of nouns
+# no return; prints formatted/aligned/padded POS + meaning
+def formatPOSnMean(posStr, meanStr, maskGender):
+	posList = parsePos(posStr)
+	meanList = parseMeaning(meanStr)
+	nPos = len(posList)
+
+	# find POS that are nouns
+	nounIdx = [idx for idx in range(nPos) if posList[idx][0]=="n"]
+
+	# if noun POS exist(s), and if maskGender is True
+	if len(nounIdx)>0 and maskGender:
+	    for j in nounIdx:
+	    	posList[j] = "NOUN"
+
+	# find max len of POS
+	maxLen = max([len(item) for item in posList])
+	# calculate number of white spaces for padding
+	nPad = [maxLen-len(item) for item in posList]
+	# apply padding(s)
+	posListPadded = [" "*nPad[i] + posList[i] for i in range(nPos)]
+
+	# print with meaning(s)
+	for i in range(nPos):
+		print(posListPadded[i] + " :", meanList[i])
+
+
+# display a word, given its row from csv (as a list)
+# binary combinatorial options of displaying individual components
+
+# format; [] indicates optional
+
+# word [freq]
+# variation
+# POS1:  meaning1
+# POS2:  meaning2
+# ...
+# [phrases]
+# [-> related]
+# [register]
+
+# example
+
+# mécontent #4158
+# mécontente
+# adj:   unhappy; discontented; displeased
+# nm/nf: malcontent
+# -> le mécontentement #4823
+
+# wordInfo: a list
+# maskGender: if True, mask gender of nouns
+# freq, phrases, related, register: boolean values
+def displayWord(wordInfo, maskGender, freq, phrases, related, register):
+    
+    # word [freq]
+    print(wordInfo[CSV_COL_N_WORD] + " #"*freq + wordInfo[CSV_COL_N_FREQ]*freq)
+
+    # variation
+    # only print if not "" (otherwise it'd look like there's a blank line)
+    if len(wordInfo[CSV_COL_N_VAR])>0:
+    	print(wordInfo[CSV_COL_N_VAR])
+    
+    # align/format POS and meaning
+    formatPOSnMean(wordInfo[CSV_COL_N_POS], wordInfo[CSV_COL_N_MEAN], maskGender)
+
+    # phrases
+    if phrases and len(wordInfo[CSV_COL_N_PHR])>0:
+    	print(wordInfo[CSV_COL_N_PHR])
+
+    # related
+    if related and len(wordInfo[CSV_COL_N_REL])>0:
+    	print("-> " + " " + wordInfo[CSV_COL_N_REL])
+
+    # register
+    if register and len(wordInfo[CSV_COL_N_REG])>0:
+    	print(wordInfo[CSV_COL_N_REG])
+
+
 # given noun and its true gender(s) in a list
 # solicit and assess user input of gender(s)
 def genderQuizSingleWord(wordInfo):
@@ -191,13 +281,12 @@ def genderQuizSingleWord(wordInfo):
 	# set max number of failures allowed
 	remainingTrials = 3
 
-	# print word
+	# display word
 	print("* * * * * * * * * * * * * * * * * *")
-	print("Quiz word: " + quizWord)
+	displayWord(wordInfo, maskGender=True, freq=True, phrases=True, related=True, register=True)
 
-	# TODO: display information about the word
-	print(meaning)
-	# TODO: play pronuncation of the word (optional?)
+
+	# TODO: play pronuncation of the word (optional? indicated by keyboard input?)
 
 	while remainingTrials > 0:
 		remainingTrials -=1
