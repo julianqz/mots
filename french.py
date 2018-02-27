@@ -351,18 +351,19 @@ def getWordInfofromCSV(csvname):
 
 # initialize database
 # returns dictRows (rows of database) and nounIdx (row indices in database that contain nouns)
-def initializeDictForNounGenderQuiz(csvname):
+def initializeDict(csvname, nounGenderQuiz):
 
 	# get database rows
 	dictRows = getWordInfofromCSV(csvname)
 	
-	# index of words that are or can be nouns
-	# noun if POS isn't "conj" and POS contains "n"
-	# ASSUMPTION: a word won't be both conj and a noun at the same time
-	nounIdx = [idx for idx in range(len(dictRows)) if "n" in dictRows[idx][CSV_COL_N_POS] and dictRows[idx][CSV_COL_N_POS]!="conj"]
+	if nounGenderQuiz:
+	    # index of words that are or can be nouns
+	    # noun if POS isn't "conj" and POS contains "n"
+	    # ASSUMPTION: a word won't be both conj and a noun at the same time
+	    nounIdx = [idx for idx in range(len(dictRows)) if "n" in dictRows[idx][CSV_COL_N_POS] and dictRows[idx][CSV_COL_N_POS]!="conj"]
 
-	# subset to noun rows
-	dictRows = [dictRows[i] for i in nounIdx]
+	    # subset to noun rows
+	    dictRows = [dictRows[i] for i in nounIdx]
 
 	return dictRows
 
@@ -371,7 +372,7 @@ def initializeDictForNounGenderQuiz(csvname):
 # if size is specified as an integer (must be <= # words), do random sampling
 def genderQuizMain(csvname, size=None):
 
-	dictRows = initializeDictForNounGenderQuiz(csvname)
+	dictRows = initializeDict(csvname, nounGenderQuiz=True)
 
 	# random sampling
 	# only nouns are sampled
@@ -392,7 +393,7 @@ def genderQuizMain(csvname, size=None):
 # e.g. "solution; rôti; viande"
 def genderQuizSelect(csvname, inputStr):
 
-	dictRows = initializeDictForNounGenderQuiz(csvname)
+	dictRows = initializeDict(csvname, nounGenderQuiz=True)
 	dictLst = [row[CSV_COL_N_WORD] for row in dictRows]
 
 	inputLst = inputStr.split("; ")
