@@ -349,36 +349,80 @@ def getWordInfofromCSV(csvname):
     #return [lstFreq, lstNA, lstWord, lstPOS, lstVar, lstMean, lstPhr, lstRel, lstReg]
     return wordRows
 
+# initialize database
+# returns dictRows (rows of database) and nounIdx (row indices in database that contain nouns)
+def initializeDictForNounGenderQuiz(csvname):
+
+	# get database rows
+	dictRows = getWordInfofromCSV(csvname)
+	
+	# index of words that are or can be nouns
+	# noun if POS isn't "conj" and POS contains "n"
+	# ASSUMPTION: a word won't be both conj and a noun at the same time
+	nounIdx = [idx for idx in range(len(dictRows)) if "n" in dictRows[idx][CSV_COL_N_POS] and dictRows[idx][CSV_COL_N_POS]!="conj"]
+
+	# subset to noun rows
+	dictRows = [dictRows[i] for i in nounIdx]
+
+	return dictRows
+
 # main wrapper function
 # given a csv file, run noun gender quiz through its words
 # if size is specified as an integer (must be <= # words), do random sampling
 def genderQuizMain(csvname, size=None):
 
-	# get wordList and posList
-	wordInfo = getWordInfofromCSV(csvname)
-	
-	# index of words that are or can be nouns
-	# noun if POS isn't "conj" and POS contains "n"
-	# ASSUMPTION: a word won't be both conj and a noun at the same time
-	nounIdx = [idx for idx in range(len(wordInfo)) if "n" in wordInfo[idx][CSV_COL_N_POS] and wordInfo[idx][CSV_COL_N_POS]!="conj"]
+	dictRows = initializeDictForNounGenderQuiz(csvname)
 
 	# random sampling
 	# only nouns are sampled
 	if size is not None:
 		try:
-			randIdx = sample(list(nounIdx), k=size)
-			wordInfo = [wordInfo[i] for i in randIdx]
+			randIdx = sample(list(range(len(dictRows))), k=size)
+			dictRows = [dictRows[i] for i in randIdx]
 		except:
 			print("size must be >0 & <= {0}".format(len(nounIdx)))
 			return
-
+	
 	# run quiz through list
 	printInputInfo()
-	genderQuizWordList(wordInfo)
+	genderQuizWordList(dictRows)
+
+
+# inputStr: a string of word(s), separated by "; "
+# e.g. "solution; rôti; viande"
+def genderQuizSelect(csvname, inputStr):
+
+	dictRows = initializeDictForNounGenderQuiz(csvname)
+	dictLst = [row[CSV_COL_N_WORD] for row in dictRows]
+
+	inputLst = inputStr.split("; ")
+
+	# input that's in and that's not in database (dictLst)
+	boolLst = [item in dictLst for item in inputLst]
+	inputLstIn = [inputLst[idx] for idx in range(len(boolLst)) if boolLst[idx]]
+	inputLstOut = [inputLst[idx] for idx in range(len(boolLst)) if not boolLst[idx]]
+	
+	# notify user
+	if len(inputLstOut)>0:
+		print("Words that are not in database and are hence skipped:")
+		for word in inputLstOut:
+			print(word)
+		print("* * * * * * * * * * * * * * * * * *")
+
+	# for words that are in database
+	if len(inputLstIn)>0:
+		# get rows from database corresponding to these words
+		inputWordRows = [dictRows[dictLst.index(word)] for word in inputLstIn]
+		
+		# run quiz through list
+		printInputInfo()
+		genderQuizWordList(inputWordRows)
 
 
 # run
-genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+genderQuizSelect(CSV_PATH+CSV_FILENAME, "blah; fromage; euro")
+#genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+#genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
 
