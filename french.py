@@ -17,6 +17,16 @@ CSV_COL_PHR = "phrases"
 CSV_COL_REL = "related"
 CSV_COL_REG = "register"
 
+CSV_COL_N_FREQ = 0
+CSV_COL_N_NA = 1
+CSV_COL_N_WORD = 2
+CSV_COL_N_POS = 3
+CSV_COL_N_VAR = 4
+CSV_COL_N_MEAN = 5
+CSV_COL_N_PHR = 6
+CSV_COL_N_REL = 7
+CSV_COL_N_REG = 8
+
 LEGAL_NOUN_POS = ("nm", "nf", "nm/nf", "nmpl", "nfpl", "nm/nf pl", "nmi", "nfi")
 LEGAL_GENDER_INPUTS = ("m", "f", "mf", "mpl", "fpl", "mfpl", "mi", "fi")
 
@@ -97,37 +107,6 @@ def formatAnswer(genderTruth):
 
 	return answer
 
-# given noun and its true gender(s) in a list
-# solicit and assess user input of gender(s)
-def genderQuizSingleWord(quizWord, genderTruth, meaning):
-
-	# set max number of failures allowed
-	remainingTrials = 3
-
-	# print word
-	print("* * * * * * * * * * * * * * * * * *")
-	print("Quiz word: " + quizWord)
-
-	# TODO: display information about the word
-	print(meaning)
-	# TODO: play pronuncation of the word (optional?)
-
-	while remainingTrials > 0:
-		remainingTrials -=1
-		# solicit input
-		currentInput = getGenderFromKeyboard()
-		# assess input
-		currentAssess = assessGenderInput(currentInput, genderTruth)
-		if currentAssess:
-			print("Très bien!")
-			return
-		else:
-			if remainingTrials>0:
-				print("{0} trials left.".format(remainingTrials))
-			else:
-				# reveal correct answer
-				correctAnswer = formatAnswer(genderTruth)
-				print("Correct answer: {0}".format(correctAnswer))
 
 # parse through parts of speech of a noun to produce a list of gender(s)
 # if input contains irregular format, a msg will be printed and None returned
@@ -200,22 +179,52 @@ def parseMeaning(toParse):
     else:
         return [toParse]
 
+# given noun and its true gender(s) in a list
+# solicit and assess user input of gender(s)
+def genderQuizSingleWord(wordInfo):
+
+	quizWord = wordInfo[CSV_COL_N_WORD]
+	posFull = wordInfo[CSV_COL_N_POS]
+	genderTruth = parseNounGender(posFull, verbose=False)
+	meaning = parseMeaning(wordInfo[CSV_COL_N_MEAN])
+
+	# set max number of failures allowed
+	remainingTrials = 3
+
+	# print word
+	print("* * * * * * * * * * * * * * * * * *")
+	print("Quiz word: " + quizWord)
+
+	# TODO: display information about the word
+	print(meaning)
+	# TODO: play pronuncation of the word (optional?)
+
+	while remainingTrials > 0:
+		remainingTrials -=1
+		# solicit input
+		currentInput = getGenderFromKeyboard()
+		# assess input
+		currentAssess = assessGenderInput(currentInput, genderTruth)
+		if currentAssess:
+			print("Très bien!")
+			return
+		else:
+			if remainingTrials>0:
+				print("{0} trials left.".format(remainingTrials))
+			else:
+				# reveal correct answer
+				correctAnswer = formatAnswer(genderTruth)
+				print("Correct answer: {0}".format(correctAnswer))
+
+
 # given a list of words and their corresponding POS
 # each word is a string; each POS is a string too
 # run gender quiz for nouns for which gender info is available in their POS
-def genderQuizWordList(wordList, posList, meanList):
+def genderQuizWordList(wordRows):
 
-	# check lens match
-	if len(wordList)!=len(posList):
-		print("Lengths of wordList and posList don't match. Something's wrong. Exiting.")
-		return
+	for i in range(len(wordRows)):
+		genderQuizSingleWord(wordRows[i])
 
-	for i in range(len(wordList)):
-		pos = parseNounGender(posList[i], verbose=False)
-		mean = parseMeaning(meanList[i])
-		#print(type(pos))
-		if pos is not None:
-			genderQuizSingleWord(wordList[i], pos, mean)
 
 # given a csv, generate:
 # a nested list
@@ -228,17 +237,25 @@ def getWordInfofromCSV(csvname):
     with open(csvname, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         wordColsAll = [ [ row[CSV_COL_FREQ], row[CSV_COL_NA], row[CSV_COL_WORD], row[CSV_COL_POS], row[CSV_COL_VAR], row[CSV_COL_MEAN], row[CSV_COL_PHR], row[CSV_COL_REL], row[CSV_COL_REG] ] for row in reader ]
-        lstFreq = [wordColsCur[0] for wordColsCur in wordColsAll]
-        lstNA   = [wordColsCur[1] for wordColsCur in wordColsAll]
-        lstWord = [wordColsCur[2] for wordColsCur in wordColsAll]
-        lstPOS  = [wordColsCur[3] for wordColsCur in wordColsAll]
-        lstVar  = [wordColsCur[4] for wordColsCur in wordColsAll]
-        lstMean = [wordColsCur[5] for wordColsCur in wordColsAll]
-        lstPhr  = [wordColsCur[6] for wordColsCur in wordColsAll]
-        lstRel  = [wordColsCur[7] for wordColsCur in wordColsAll]
-        lstReg  = [wordColsCur[8] for wordColsCur in wordColsAll]
-        
-    return [lstFreq, lstNA, lstWord, lstPOS, lstVar, lstMean, lstPhr, lstRel, lstReg]
+    
+    # columns    
+    # can't int("")
+    lstFreq = [wordColsCur[CSV_COL_N_FREQ] for wordColsCur in wordColsAll]
+    lstNA   = [wordColsCur[CSV_COL_N_NA] for wordColsCur in wordColsAll]
+    lstWord = [wordColsCur[CSV_COL_N_WORD] for wordColsCur in wordColsAll]
+    lstPOS  = [wordColsCur[CSV_COL_N_POS] for wordColsCur in wordColsAll]
+    lstVar  = [wordColsCur[CSV_COL_N_VAR] for wordColsCur in wordColsAll]
+    lstMean = [wordColsCur[CSV_COL_N_MEAN] for wordColsCur in wordColsAll]
+    lstPhr  = [wordColsCur[CSV_COL_N_PHR] for wordColsCur in wordColsAll]
+    lstRel  = [wordColsCur[CSV_COL_N_REL] for wordColsCur in wordColsAll]
+    lstReg  = [wordColsCur[CSV_COL_N_REG] for wordColsCur in wordColsAll]
+    
+    # rows
+    # nested list; each entry is itself a list corresponding to a word
+    wordRows = [ [lstFreq[idx], lstNA[idx], lstWord[idx], lstPOS[idx], lstVar[idx], lstMean[idx], lstPhr[idx], lstRel[idx], lstReg[idx]] for idx in range(len(lstWord))]
+
+    #return [lstFreq, lstNA, lstWord, lstPOS, lstVar, lstMean, lstPhr, lstRel, lstReg]
+    return wordRows
 
 # main wrapper function
 # given a csv file, run noun gender quiz through its words
@@ -247,30 +264,25 @@ def genderQuizMain(csvname, size=None):
 
 	# get wordList and posList
 	wordInfo = getWordInfofromCSV(csvname)
-	lstWord = wordInfo[2]
-	lstPos  = wordInfo[3]
-	lstMean = wordInfo[5]
-
+	
 	# index of words that are or can be nouns
 	# noun if POS isn't "conj" and POS contains "n"
 	# ASSUMPTION: a word won't be both conj and a noun at the same time
-	nounIdx = [idx for idx in range(len(lstPos)) if "n" in lstPos[idx] and lstPos[idx]!="conj"]
+	nounIdx = [idx for idx in range(len(wordInfo)) if "n" in wordInfo[idx][CSV_COL_N_POS] and wordInfo[idx][CSV_COL_N_POS]!="conj"]
 
 	# random sampling
 	# only nouns are sampled
 	if size is not None:
 		try:
 			randIdx = sample(list(nounIdx), k=size)
-			lstWord = [lstWord[i] for i in randIdx]
-			lstPos  = [lstPos[i] for i in randIdx]
-			lstMean = [lstMean[i] for i in randIdx]
+			wordInfo = [wordInfo[i] for i in randIdx]
 		except:
 			print("size must be >0 & <= {0}".format(len(nounIdx)))
 			return
 
 	# run quiz through list
 	printInputInfo()
-	genderQuizWordList(lstWord, lstPos, lstMean)
+	genderQuizWordList(wordInfo)
 
 
 # run
