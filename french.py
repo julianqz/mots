@@ -185,20 +185,27 @@ def genderQuizWordList(wordList, posList):
 			genderQuizSingleWord(wordList[i], pos)
 
 # given a csv, generate:
+# a nested list
+# each nested component is itself a list, representing a column from csv
+# items in nested componenets correspond in terms of index
 # e.g. a list of words; each word is a string (e.g. "courageux")
 # e.g. a list of POS corresponding to the words; each POS is a string (e.g. "adj; nm")
-# given a csv, generate:
-# a list of words; each word is a string (e.g. "courageux")
-# a list of POS corresponding to the words; each POS is a string (e.g. "adj; nm")
-def getWordPOSfromCSV(csvname):
+def getWordInfofromCSV(csvname):
     
     with open(csvname, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        wordPosList = [ [row[CSV_COL_WORD], row[CSV_COL_POS]] for row in reader ]
-        wordList = [wordPos[0] for wordPos in wordPosList]
-        posList = [wordPos[1] for wordPos in wordPosList]
-    
-    return wordList, posList
+        wordColsAll = [ [ row[CSV_COL_FREQ], row[CSV_COL_NA], row[CSV_COL_WORD], row[CSV_COL_POS], row[CSV_COL_VAR], row[CSV_COL_MEAN], row[CSV_COL_PHR], row[CSV_COL_REL], row[CSV_COL_REG] ] for row in reader ]
+        lstFreq = [wordColsCur[0] for wordColsCur in wordColsAll]
+        lstNA   = [wordColsCur[1] for wordColsCur in wordColsAll]
+        lstWord = [wordColsCur[2] for wordColsCur in wordColsAll]
+        lstPOS  = [wordColsCur[3] for wordColsCur in wordColsAll]
+        lstVar  = [wordColsCur[4] for wordColsCur in wordColsAll]
+        lstMean = [wordColsCur[5] for wordColsCur in wordColsAll]
+        lstPhr  = [wordColsCur[6] for wordColsCur in wordColsAll]
+        lstRel  = [wordColsCur[7] for wordColsCur in wordColsAll]
+        lstReg  = [wordColsCur[8] for wordColsCur in wordColsAll]
+        
+    return [lstFreq, lstNA, lstWord, lstPOS, lstVar, lstMean, lstPhr, lstRel, lstReg]
 
 # main wrapper function
 # given a csv file, run noun gender quiz through its words
@@ -206,8 +213,10 @@ def getWordPOSfromCSV(csvname):
 def genderQuizMain(csvname, size=None):
 
 	# get wordList and posList
-	wordList, posList = getWordPOSfromCSV(csvname)
-	
+	wordInfo = getWordInfofromCSV(csvname)
+	wordList = wordInfo[2]
+	posList = wordInfo[3]
+
 	# random sampling
 	lenList = len(wordList)
 
@@ -228,8 +237,8 @@ def genderQuizMain(csvname, size=None):
 # run
 # number of words actually on the quiz could be smaller than size
 # this is because non-nouns and nouns with no gender info are omitted
-#genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
-genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
+genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+#genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
 
 # for testing
 
