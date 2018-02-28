@@ -2,6 +2,7 @@
 
 import csv
 import re
+import sys
 from random import sample
 
 # meta parameters
@@ -29,8 +30,11 @@ CSV_COL_N_PHR  = 6
 CSV_COL_N_REL  = 7
 CSV_COL_N_REG  = 8
 
+#* TO BE MONITORED; UPDATE AS NECESSARY
 LEGAL_NOUN_POS =      ("nm", "nf", "nm/nf", "nmpl", "nfpl", "nm(pl)", "nf(pl)", "nmi", "n")
 LEGAL_GENDER_INPUTS = ("m",  "f",  "mf",    "mpl",  "fpl",  "m(pl)",  "f(pl)",  "mi",  "n")
+
+LEGAL_POS = ("adj", "adj(f)", "adji", "adv", "conj", "det", "excl", "prep", "v", "vi", "vi-reflex", "vt") + LEGAL_NOUN_POS
 
 # print info about expected input
 def printInputInfo():
@@ -124,8 +128,8 @@ def parsePos(posStr):
 
 
 # parse through parts of speech of a noun to produce a list of gender(s)
-# if input contains irregular format, a msg will be printed and None returned
-def parseNounGender(posStr, verbose=True):
+# if input contains irregular format, sys.exit() will be triggered along with a message
+def parseNounGender(posStr):
 
 	posList = parsePos(posStr)
 
@@ -136,14 +140,12 @@ def parseNounGender(posStr, verbose=True):
 	# check that posList is not empty 
 	# will be empty for non-nouns or nouns without gender info (e.g. Londres, n)
 	if len(posList)==0:
-		if verbose: print("WARNING: No noun POS with gender. None returned.")
-		return
+		sys.exit("WARNING: No noun POS with gender. Exited.")
 
 	# check legality of posList against LEGAL_NOUN_POS
 	for item in posList:
 		if item not in LEGAL_NOUN_POS:
-			print("WARNING: Noun POS contains illegal item ({0}). None returned.".format(item))
-			return
+			sys.exit("WARNING: Noun POS contains illegal item ({0}). Exited.".format(item))			
 
 	# parse
 	# nm       -> m
@@ -284,7 +286,7 @@ def genderQuizSingleWord(wordInfo):
 
 	quizWord = wordInfo[CSV_COL_N_WORD]
 	posFull = wordInfo[CSV_COL_N_POS]
-	genderTruth = parseNounGender(posFull, verbose=True)
+	genderTruth = parseNounGender(posFull)
 	meaning = parseMeaning(wordInfo[CSV_COL_N_MEAN])
 
 	# set max number of failures allowed
@@ -324,6 +326,27 @@ def genderQuizWordList(wordRows):
 		genderQuizSingleWord(wordRows[i])
 
 
+# given a list of POS (specifically, lstPOS from getWordInfofromCSV)
+# e.g. ['excl; nm', 'v', 'nf', 'nm', 'nm', 'nf']
+# parse and get unique set of POS in the database
+# returns a set containing unique POS found in database
+def getUniquePOS(lstPOS):
+	
+	# get a nested list
+	nestedLstParsedPOS = [parsePos(POS) for POS in lstPOS]
+	# flatten lstParsedPOS
+	flatLstParsedPOS = [item for sublist in nestedLstParsedPOS for item in sublist]
+	# get unique POS from flattened list
+	uniquePOS = set(flatLstParsedPOS)
+
+	return uniquePOS
+
+# given a set of unique POS found in database, check against LEGAL_POS
+# returns True if all unique POS are legal; False otherwise
+def checkUniquePOS(uniqueSetPOS):
+
+	return uniqueSetPOS.issubset(LEGAL_POS)
+
 # given a csv, generate:
 # a nested list
 # each nested component is itself a list, representing a column from csv
@@ -347,6 +370,13 @@ def getWordInfofromCSV(csvname):
     lstPhr  = [wordColsCur[CSV_COL_N_PHR] for wordColsCur in wordColsAll]
     lstRel  = [wordColsCur[CSV_COL_N_REL] for wordColsCur in wordColsAll]
     lstReg  = [wordColsCur[CSV_COL_N_REG] for wordColsCur in wordColsAll]
+
+    # sanity check
+    uniqSetPOS = getUniquePOS(lstPOS)
+    # exit if there is illegal POS in csv
+    # also notify user which POS is illegal
+    if not checkUniquePOS(uniqSetPOS):
+    	sys.exit("Warning: Illegal POS found in csv: " + str(uniqSetPOS.difference(LEGAL_POS)) + ". Exited.")
     
     # rows
     # nested list; each entry is itself a list corresponding to a word
