@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import csv
 import re
 from random import sample
@@ -27,8 +29,8 @@ CSV_COL_N_PHR  = 6
 CSV_COL_N_REL  = 7
 CSV_COL_N_REG  = 8
 
-LEGAL_NOUN_POS = ("nm", "nf", "nm/nf", "nmpl", "nfpl", "nm/nf pl", "nmi", "nfi")
-LEGAL_GENDER_INPUTS = ("m", "f", "mf", "mpl", "fpl", "mfpl", "mi", "fi")
+LEGAL_NOUN_POS =      ("nm", "nf", "nm/nf", "nmpl", "nfpl", "nm(pl)", "nf(pl)", "nmi", "n")
+LEGAL_GENDER_INPUTS = ("m",  "f",  "mf",    "mpl",  "fpl",  "m(pl)",  "f(pl)",  "mi",  "n")
 
 # print info about expected input
 def printInputInfo():
@@ -39,12 +41,13 @@ def printInputInfo():
 		LEGAL_GENDER_INPUTS[0], LEGAL_NOUN_POS[0], 
 		LEGAL_GENDER_INPUTS[1], LEGAL_NOUN_POS[1], 
 		LEGAL_GENDER_INPUTS[2], LEGAL_NOUN_POS[2]))
-	print("'{0}' for {1}, '{2}' for {3}, '{4}' for {5}".format(
-		LEGAL_GENDER_INPUTS[3], LEGAL_NOUN_POS[3], 
-		LEGAL_GENDER_INPUTS[4], LEGAL_NOUN_POS[4], 
-		LEGAL_GENDER_INPUTS[5], LEGAL_NOUN_POS[5]))
 	print("'{0}' for {1}, '{2}' for {3}".format(
-		LEGAL_GENDER_INPUTS[6], LEGAL_NOUN_POS[6], 
+		LEGAL_GENDER_INPUTS[3], LEGAL_NOUN_POS[3], 
+		LEGAL_GENDER_INPUTS[4], LEGAL_NOUN_POS[4]))
+	print("'{0}' for {1}, '{2}' for {3}".format(
+		LEGAL_GENDER_INPUTS[5], LEGAL_NOUN_POS[5], 
+		LEGAL_GENDER_INPUTS[6], LEGAL_NOUN_POS[6]))
+	print("'{0}' for {1}".format(
 		LEGAL_GENDER_INPUTS[7], LEGAL_NOUN_POS[7]))
 	#print("'m' for nm, 'f' for nf, 'mf' for nm/nf")
 	#print("'mpl' for nmpl, 'fpl' for nfpl, 'mfpl' for nm/nf pl")
@@ -122,24 +125,24 @@ def parsePos(posStr):
 
 # parse through parts of speech of a noun to produce a list of gender(s)
 # if input contains irregular format, a msg will be printed and None returned
-def parseNounGender(posStr, verbose=False):
+def parseNounGender(posStr, verbose=True):
 
 	posList = parsePos(posStr)
 
     # keep only pos starting with "n" (thereby excluding "conj") and of length >1
-    # "n" (e.g. Londres), for which gender info is unavail., is excluded
-	posList = [item for item in posList if item[0]=="n" and len(item)>1]
+    # "n" (e.g. Londres), for which gender info is unavail., is included
+	posList = [item for item in posList if item[0]=="n"]
 
 	# check that posList is not empty 
 	# will be empty for non-nouns or nouns without gender info (e.g. Londres, n)
 	if len(posList)==0:
-		if verbose: print("No noun POS with gender. None returned.")
+		if verbose: print("WARNING: No noun POS with gender. None returned.")
 		return
 
 	# check legality of posList against LEGAL_NOUN_POS
 	for item in posList:
 		if item not in LEGAL_NOUN_POS:
-			print("Noun POS contains illegal item ({0}). None returned.".format(item))
+			print("WARNING: Noun POS contains illegal item ({0}). None returned.".format(item))
 			return
 
 	# parse
@@ -151,12 +154,15 @@ def parseNounGender(posStr, verbose=False):
 	# nm/nf pl -> mfpl
 	genderList = []
 	for item in posList:
-		if item=="nm/nf":
-			genderList.extend(["mf"])
-		elif item=="nm/nf pl":
-			genderList.extend(["mfpl"])
+		if len(item)==1: # e.g. "n"
+			genderList.extend(item)
 		else:
-			genderList.extend([item[1:]])
+			if item=="nm/nf":
+				genderList.extend(["mf"])
+			#elif item=="nm/nf pl":
+				#genderList.extend(["mfpl"])
+			else:
+				genderList.extend([item[1:]])
 
 	#print(genderList)
 	return genderList
@@ -278,7 +284,7 @@ def genderQuizSingleWord(wordInfo):
 
 	quizWord = wordInfo[CSV_COL_N_WORD]
 	posFull = wordInfo[CSV_COL_N_POS]
-	genderTruth = parseNounGender(posFull, verbose=False)
+	genderTruth = parseNounGender(posFull, verbose=True)
 	meaning = parseMeaning(wordInfo[CSV_COL_N_MEAN])
 
 	# set max number of failures allowed
@@ -421,7 +427,10 @@ def genderQuizSelect(csvname, inputStr):
 
 
 # run
-genderQuizSelect(CSV_PATH+CSV_FILENAME, "blah; fromage; euro")
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "blah; fromage; euro")
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "religieux; décès")
+genderQuizSelect(CSV_PATH+CSV_FILENAME, "Londres") # n
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "décès") # nm(pl)
 #genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
