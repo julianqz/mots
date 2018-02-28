@@ -39,23 +39,36 @@ LEGAL_POS = ("adj", "adj(f)", "adji", "adv", "conj", "det", "excl", "prep", "v",
 # print info about expected input
 def printInputInfo():
 
-	print("Answers should match meanings in order.")
+	print("\n* * * * * * * * * * * * * * * * * *\n")
 	
-	print("Use ';' without space for separation.")
-	print("'{0}' for {1}, '{2}' for {3}, '{4}' for {5}".format(
-		LEGAL_GENDER_INPUTS[0], LEGAL_NOUN_POS[0], 
-		LEGAL_GENDER_INPUTS[1], LEGAL_NOUN_POS[1], 
-		LEGAL_GENDER_INPUTS[2], LEGAL_NOUN_POS[2]))
-	print("'{0}' for {1}, '{2}' for {3}".format(
-		LEGAL_GENDER_INPUTS[3], LEGAL_NOUN_POS[3], 
-		LEGAL_GENDER_INPUTS[4], LEGAL_NOUN_POS[4]))
-	print("'{0}' for {1}, '{2}' for {3}".format(
-		LEGAL_GENDER_INPUTS[5], LEGAL_NOUN_POS[5], 
-		LEGAL_GENDER_INPUTS[6], LEGAL_NOUN_POS[6]))
-	print("'{0}' for {1}".format(
-		LEGAL_GENDER_INPUTS[7], LEGAL_NOUN_POS[7]))
+	for i in range(len(LEGAL_NOUN_POS)):
+		print("'{0}' = {1}".format(LEGAL_GENDER_INPUTS[i], LEGAL_NOUN_POS[i]))
 
-	print("E.g.: 'f', 'm;f', 'f;m', 'mf;f;m'")
+	print("\nUse ';' without space to separate multiple answers.\n")
+
+	print("Answers should match meanings in order.\n")
+
+	print("E.g.")
+	print("merci")
+	print("excl : thank you")
+	print("NOUN : thank you")
+	print("NOUN : mercy\n")
+	print("Expected answers: 'm;f' (not 'f;m')")
+
+	#print("\nE.g.: 'f', 'm;f', 'f;m', 'mf;f;m'")
+	
+	#print("'{0}' for {1}, '{2}' for {3}, '{4}' for {5}".format(
+		#LEGAL_GENDER_INPUTS[0], LEGAL_NOUN_POS[0], 
+		#LEGAL_GENDER_INPUTS[1], LEGAL_NOUN_POS[1], 
+		#LEGAL_GENDER_INPUTS[2], LEGAL_NOUN_POS[2]))
+	#print("'{0}' for {1}, '{2}' for {3}".format(
+		#LEGAL_GENDER_INPUTS[3], LEGAL_NOUN_POS[3], 
+		#LEGAL_GENDER_INPUTS[4], LEGAL_NOUN_POS[4]))
+	#print("'{0}' for {1}, '{2}' for {3}".format(
+		#LEGAL_GENDER_INPUTS[5], LEGAL_NOUN_POS[5], 
+		#LEGAL_GENDER_INPUTS[6], LEGAL_NOUN_POS[6]))
+	#print("'{0}' for {1}".format(
+		#LEGAL_GENDER_INPUTS[7], LEGAL_NOUN_POS[7]))
 
 
 # capture input gender & process into a list
@@ -309,7 +322,7 @@ def genderQuizSingleWord(wordInfo):
 	remainingTrials = 3
 
 	# display word
-	print("\n * * * * * * * * * * * * * * * * * *")
+	print("\n* * * * * * * * * * * * * * * * * *\n")
 	displayWord(wordInfo, maskGender=True, freq=True, phrases=True, related=True, register=True)
 	print(" ")
 
@@ -458,10 +471,9 @@ def genderQuizSelect(csvname, inputStr):
 	
 	# notify user
 	if len(inputLstOut)>0:
-		print("Word(s) not in database and hence skipped:")
+		print("\nWord(s) not in database and hence skipped:\n")
 		for word in inputLstOut:
 			print(word)
-		print("* * * * * * * * * * * * * * * * * *")
 
 	# for words that are in database
 	if len(inputLstIn)>0:
@@ -479,8 +491,8 @@ def genderQuizSelect(csvname, inputStr):
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "Londres") # n
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "décès") # nm(pl)
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "rouge") 
-#genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
-genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
+#genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
