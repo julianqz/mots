@@ -6,7 +6,7 @@ import sys
 from random import sample
 
 # meta parameters
-QUIZ_SIZE = 5
+QUIZ_SIZE = 10
 CSV_PATH = "/Users/jkewz/Desktop/fr/"
 CSV_FILENAME = "mots.csv"
 
@@ -210,6 +210,10 @@ def formatPOSnMean(posStr, meanStr, maskGender):
 	posList = parsePos(posStr)
 	meanList = parseMeaning(meanStr)
 	nPos = len(posList)
+
+	# sanity check
+	if not len(posList)==len(meanList):
+		sys.exit("Lengths of POS and meanings do not match. Check CSV. Exited.")
 
 	# find POS that are nouns
 	nounIdx = [idx for idx in range(nPos) if posList[idx][0]=="n"]
@@ -463,10 +467,11 @@ def genderQuizSelect(csvname, inputStr):
 
 # run
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "blah; fromage; euro")
-genderQuizSelect(CSV_PATH+CSV_FILENAME, "religieux; décès; Londres; bônbon")
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "religieux; décès; Londres; bônbon")
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "Londres") # n
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "décès") # nm(pl)
-#genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "rouge") 
+genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
