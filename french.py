@@ -39,7 +39,8 @@ LEGAL_POS = ("adj", "adj(f)", "adji", "adv", "conj", "det", "excl", "prep", "v",
 # print info about expected input
 def printInputInfo():
 
-	print("Type in any order.")
+	print("Answers should match meanings in order.")
+	
 	print("Use ';' without space for separation.")
 	print("'{0}' for {1}, '{2}' for {3}, '{4}' for {5}".format(
 		LEGAL_GENDER_INPUTS[0], LEGAL_NOUN_POS[0], 
@@ -53,8 +54,7 @@ def printInputInfo():
 		LEGAL_GENDER_INPUTS[6], LEGAL_NOUN_POS[6]))
 	print("'{0}' for {1}".format(
 		LEGAL_GENDER_INPUTS[7], LEGAL_NOUN_POS[7]))
-	#print("'m' for nm, 'f' for nf, 'mf' for nm/nf")
-	#print("'mpl' for nmpl, 'fpl' for nfpl, 'mfpl' for nm/nf pl")
+
 	print("E.g.: 'f', 'm;f', 'f;m', 'mf;f;m'")
 
 
@@ -81,14 +81,20 @@ def getGenderFromKeyboard():
 def assessGenderInput(genderInput, genderTruth):
 
 	# DO NOT USE IN-PLACE SORT HERE
-	genderInput = sorted(genderInput)
-	genderTruth = sorted(genderTruth)
+	genderInputSorted = sorted(genderInput)
+	genderTruthSorted = sorted(genderTruth)
 
 	lenInput = len(genderInput)
 	lenTruth = len(genderTruth)
 
+	# ORDER MATTERS
+	# correct if correct in both content and order of genders
 	if genderInput == genderTruth:
 		return True
+	# give hint if content is correct but order is wrong
+	elif genderInputSorted == genderTruthSorted:
+		print("Is the order correct? Check again.")
+		return False
 	else:
 		if lenInput > lenTruth:
 			print("Too many! Expecting {0}; received {1}.".format(lenTruth, lenInput))
@@ -471,7 +477,8 @@ def genderQuizSelect(csvname, inputStr):
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "Londres") # n
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "décès") # nm(pl)
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "rouge") 
-genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
+#genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
