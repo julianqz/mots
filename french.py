@@ -270,9 +270,9 @@ def displayWord(wordInfo, maskGender, freq, phrases, related, register):
     
     # word [freq]
     if freq and len(wordInfo[CSV_COL_N_FREQ])>0:
-    	print(wordInfo[CSV_COL_N_WORD] + " #" + wordInfo[CSV_COL_N_FREQ])
+    	print(wordInfo[CSV_COL_N_WORD] + " #" + wordInfo[CSV_COL_N_FREQ] + "\n")
     else:
-    	print(wordInfo[CSV_COL_N_WORD])
+    	print(wordInfo[CSV_COL_N_WORD] + "\n")
 
     # variation
     # only print if not "" (otherwise it'd look like there's a blank line)
@@ -295,6 +295,7 @@ def displayWord(wordInfo, maskGender, freq, phrases, related, register):
     	print(wordInfo[CSV_COL_N_REG])
 
 
+
 # given noun and its true gender(s) in a list
 # solicit and assess user input of gender(s)
 def genderQuizSingleWord(wordInfo):
@@ -308,8 +309,9 @@ def genderQuizSingleWord(wordInfo):
 	remainingTrials = 3
 
 	# display word
-	print("* * * * * * * * * * * * * * * * * *")
+	print("\n * * * * * * * * * * * * * * * * * *")
 	displayWord(wordInfo, maskGender=True, freq=True, phrases=True, related=True, register=True)
+	print(" ")
 
 
 	# TODO: play pronuncation of the word (optional? indicated by keyboard input?)
@@ -477,8 +479,8 @@ def genderQuizSelect(csvname, inputStr):
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "Londres") # n
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "décès") # nm(pl)
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "rouge") 
-genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
-#genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
+genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
