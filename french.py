@@ -80,8 +80,9 @@ def getGenderFromKeyboard():
 # assess input gender (list) by comparing with truth (list)
 def assessGenderInput(genderInput, genderTruth):
 
-	genderInput.sort()
-	genderTruth.sort()
+	# DO NOT USE IN-PLACE SORT HERE
+	genderInput = sorted(genderInput)
+	genderTruth = sorted(genderTruth)
 
 	lenInput = len(genderInput)
 	lenTruth = len(genderTruth)
@@ -103,7 +104,11 @@ def assessGenderInput(genderInput, genderTruth):
 # for printing as correct answer
 def formatAnswer(genderTruth):
 
-	genderTruth.sort()
+	# DO NOT SORT here (otherwise order of genders may not match that of POS:meanings)
+	# e.g. religieux has POS:meanings as follows: NOUN:monk, NOUN:nun
+	# expect answer to be m;f
+	# if sorted, answer will become f;m
+	#genderTruth = sorted(genderTruth)
 	
 	answer = ""
 	for gender in genderTruth:
@@ -441,7 +446,7 @@ def genderQuizSelect(csvname, inputStr):
 	
 	# notify user
 	if len(inputLstOut)>0:
-		print("Words that are not in database and are hence skipped:")
+		print("Word(s) not in database and hence skipped:")
 		for word in inputLstOut:
 			print(word)
 		print("* * * * * * * * * * * * * * * * * *")
@@ -458,8 +463,8 @@ def genderQuizSelect(csvname, inputStr):
 
 # run
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "blah; fromage; euro")
-#genderQuizSelect(CSV_PATH+CSV_FILENAME, "religieux; décès")
-genderQuizSelect(CSV_PATH+CSV_FILENAME, "Londres") # n
+genderQuizSelect(CSV_PATH+CSV_FILENAME, "religieux; décès; Londres; bônbon")
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "Londres") # n
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "décès") # nm(pl)
 #genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
