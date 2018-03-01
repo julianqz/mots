@@ -52,9 +52,9 @@ def printInputInfo():
 
 	print("E.g.")
 	print("merci")
-	print("excl : thank you")
-	print("NOUN : thank you")
-	print("NOUN : mercy\n")
+	print("intj : thank you")
+	print("NOUN : thank you (masculine)")
+	print("NOUN : mercy (feminine)\n")
 	print("Expected answers: 'm;f' (not 'f;m')")
 
 	#print("\nE.g.: 'f', 'm;f', 'f;m', 'mf;f;m'")
@@ -359,7 +359,7 @@ def genderQuizWordList(wordRows):
 
 
 # given a list of POS (specifically, lstPOS from getWordInfofromCSV)
-# e.g. ['excl; nm', 'v', 'nf', 'nm', 'nm', 'nf']
+# e.g. ['intj; nm', 'v', 'nf', 'nm', 'nm', 'nf']
 # parse and get unique set of POS in the database
 # returns a set containing unique POS found in database
 def getUniquePOS(lstPOS):
@@ -460,6 +460,8 @@ def genderQuizMain(csvname, size=None):
 	printInputInfo()
 	genderQuizWordList(dictRows)
 
+	print("\n~ La Fin ~\n")
+
 
 # inputStr: a string of word(s), separated by "; "
 # e.g. "solution; rôti; viande"
@@ -490,6 +492,8 @@ def genderQuizSelect(csvname, inputStr):
 		printInputInfo()
 		genderQuizWordList(inputWordRows)
 
+		print("\n~ La Fin ~\n")
+
 
 # run
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "blah; fromage; euro")
@@ -498,8 +502,8 @@ def genderQuizSelect(csvname, inputStr):
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "décès") # nm(pl)
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "rouge") 
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
-genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci; coucou; Londres") 
-#genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci; coucou; Londres") 
+genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
