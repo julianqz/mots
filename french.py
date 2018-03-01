@@ -88,7 +88,7 @@ def getGenderFromKeyboard():
 		return allGendersList
 	else:
 		print("Incorrect input format.")
-		printInputInfo()
+		#printInputInfo()
 		return getGenderFromKeyboard()
 
 
