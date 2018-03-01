@@ -34,13 +34,15 @@ CSV_COL_N_REG  = 8
 LEGAL_NOUN_POS =      ("nm", "nf", "nm/nf", "nmpl", "nfpl", "nm(pl)", "nf(pl)", "nmi", "n")
 LEGAL_GENDER_INPUTS = ("m",  "f",  "mf",    "mpl",  "fpl",  "m(pl)",  "f(pl)",  "mi",  "n")
 
-LEGAL_POS = ("adj", "adj(f)", "adji", "adv", "conj", "det", "excl", "prep", "v", "vi", "vi-reflex", "vt") + LEGAL_NOUN_POS
+LEGAL_POS = ("adj", "adj(f)", "adj(pl)", "adji", "adv", "conj", "det", "intj", "prep", "v", "vi", "vi-reflex", "vt") + LEGAL_NOUN_POS
 
 # print info about expected input
 def printInputInfo():
 
 	print("\n* * * * * * * * * * * * * * * * * *\n")
-	
+
+	print("Gender Quiz for Nouns!\n")
+
 	for i in range(len(LEGAL_NOUN_POS)):
 		print("'{0}' = {1}".format(LEGAL_GENDER_INPUTS[i], LEGAL_NOUN_POS[i]))
 
@@ -157,7 +159,7 @@ def parseNounGender(posStr):
 
 	posList = parsePos(posStr)
 
-    # keep only pos starting with "n" (thereby excluding "conj") and of length >1
+    # keep only pos starting with "n" (thereby excluding "conj" & "intj") and of length >1
     # "n" (e.g. Londres), for which gender info is unavail., is included
 	posList = [item for item in posList if item[0]=="n"]
 
@@ -424,9 +426,13 @@ def initializeDict(csvname, nounGenderQuiz):
 	
 	if nounGenderQuiz:
 	    # index of words that are or can be nouns
-	    # noun if POS isn't "conj" and POS contains "n"
-	    # ASSUMPTION: a word won't be both conj and a noun at the same time
-	    nounIdx = [idx for idx in range(len(dictRows)) if "n" in dictRows[idx][CSV_COL_N_POS] and dictRows[idx][CSV_COL_N_POS]!="conj"]
+	    # noun if POS isn't "conj"/"intj" and POS contains "n"
+	    # need to be able to handle words like:
+	    # Londres: n
+	    # merci: intj; nm; nf
+	    # coucou: intj; nm
+	    # strategy: remove "intj" and "conj"; then look for "n"
+	    nounIdx = [idx for idx in range(len(dictRows)) if  "n" in re.sub("(intj)|(conj)", "", dictRows[idx][CSV_COL_N_POS])]
 
 	    # subset to noun rows
 	    dictRows = [dictRows[i] for i in nounIdx]
@@ -491,7 +497,8 @@ def genderQuizSelect(csvname, inputStr):
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "Londres") # n
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "décès") # nm(pl)
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "rouge") 
-genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
+genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci; coucou; Londres") 
 #genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
