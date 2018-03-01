@@ -5,7 +5,8 @@ Quiz on Genders of Nouns
 
 E.g.:
 ```
- * * * * * * * * * * * * * * * * * *
+* * * * * * * * * * * * * * * * * *
+
 résultat #428
 
 NOUN : result; outcome; findings
@@ -18,7 +19,8 @@ Your input:
 m
 Très bien!
 
- * * * * * * * * * * * * * * * * * *
+* * * * * * * * * * * * * * * * * *
+
 île
 
 NOUN : island
