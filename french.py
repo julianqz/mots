@@ -6,7 +6,7 @@ import sys
 from random import sample
 
 # meta parameters
-QUIZ_SIZE = 10
+QUIZ_SIZE = 5
 CSV_PATH = "/Users/jkewz/Desktop/fr/"
 CSV_FILENAME = "mots.csv"
 
@@ -213,20 +213,29 @@ def parseMeaning(toParse):
         # +: to match 1 or more repetitions of the preceding RE
         # \w: matches Unicode word characters; this includes most characters that can be part 
         #     of a word in any language, as well as numbers and the underscore
-        parsedWithCurly = re.findall("{[\w\s,;-]+}", toParse)
+        parsedWithCurly = re.findall("{[\w\s,;\/\(\)-]+}", toParse)
         
         # within each {}, remove {}
-        parsedWithoutCurly = [re.search("[\w\s,;-]+", item)[0] for item in parsedWithCurly]
+        parsedWithoutCurly = [re.search("[\w\s,;\/\(\)-]+", item)[0] for item in parsedWithCurly]
         
         return parsedWithoutCurly
     else:
         return [toParse]
 
 
+# print with option to not print (basically just a wrapper)
+# content: content to be printed; will be passed as is to print() if dontPrint=False
+# dontPrint: boolean; if True, won't print
+def printOrNot(content, dontPrint):
+	if not dontPrint:
+		print(content)
+	else:
+		return
+
 # wordInfo: a list representing a row corresponding to a word in CSV
 # maskGender: boolean value; if True, mask gender of nouns
 # no return; prints formatted/aligned/padded POS + meaning
-def formatPOSnMean(wordInfo, maskGender):
+def formatPOSnMean(wordInfo, maskGender, dontQuiz):
 	word = wordInfo[CSV_COL_N_WORD]
 	# posStr: a string of POS(s); like "nm", "adj; nm/nf"
 	posStr = wordInfo[CSV_COL_N_POS]
@@ -258,7 +267,7 @@ def formatPOSnMean(wordInfo, maskGender):
 
 	# print with meaning(s)
 	for i in range(nPos):
-		print(posListPadded[i] + " :", meanList[i])
+		printOrNot(posListPadded[i] + " :" + meanList[i], dontPrint=dontQuiz)
 
 
 # display a word, given its row from csv (as a list)
@@ -289,44 +298,49 @@ def formatPOSnMean(wordInfo, maskGender):
 # word, freq, phrases, related, register: boolean values
 # freq only makes a difference if word is True
 # maskWordInPhrase only makes a difference if phrases if True
-def displayWord(wordInfo, maskGender, maskWordInPhrase, word, freq, phrases, related, register):
-    
-    # word [freq]
-    if word:
-    	if freq and len(wordInfo[CSV_COL_N_FREQ])>0:
-    		print(wordInfo[CSV_COL_N_WORD] + " #" + wordInfo[CSV_COL_N_FREQ] + "\n")
-    	else:
-    		print(wordInfo[CSV_COL_N_WORD] + "\n")
+def displayWord(wordInfo, maskGender, maskWordInPhrase, word, freq, phrases, related, register, dontQuiz):
 
-    # variation
-    # only print if not "" (otherwise it'd look like there's a blank line)
-    if len(wordInfo[CSV_COL_N_VAR])>0:
-    	print(wordInfo[CSV_COL_N_VAR])
-    
-    # align/format POS and meaning
-    formatPOSnMean(wordInfo, maskGender)
+	if dontQuiz:
+		print(wordInfo[CSV_COL_N_WORD])
 
-    # phrases
-    if phrases and len(wordInfo[CSV_COL_N_PHR])>0:
-    	if maskWordInPhrase:
-    		# mask word in $phrases with ?
-    		maskedPhrase = re.sub(wordInfo[CSV_COL_N_WORD], "?", wordInfo[CSV_COL_N_PHR])
-    	else:
-    		print(wordInfo[CSV_COL_N_PHR])
+	# word [freq]
+	if word:
+		if freq and len(wordInfo[CSV_COL_N_FREQ])>0:
+			printOrNot(wordInfo[CSV_COL_N_WORD] + " #" + wordInfo[CSV_COL_N_FREQ] + "\n", dontPrint=dontQuiz)
+		else:
+			printOrNot(wordInfo[CSV_COL_N_WORD] + "\n", dontPrint=dontQuiz)
 
-    # related
-    if related and len(wordInfo[CSV_COL_N_REL])>0:
-    	print("-> " + " " + wordInfo[CSV_COL_N_REL])
+	# variation
+	# only print if not "" (otherwise it'd look like there's a blank line)
+	if len(wordInfo[CSV_COL_N_VAR])>0:
+		printOrNot(wordInfo[CSV_COL_N_VAR], dontPrint=dontQuiz)
 
-    # register
-    if register and len(wordInfo[CSV_COL_N_REG])>0:
-    	print(wordInfo[CSV_COL_N_REG])
+	# align/format POS and meaning
+	formatPOSnMean(wordInfo, maskGender, dontQuiz)
+
+	# phrases
+	if phrases and len(wordInfo[CSV_COL_N_PHR])>0:
+		if maskWordInPhrase:
+		    # mask word in $phrases with ?
+		    maskedPhrase = re.sub(wordInfo[CSV_COL_N_WORD], "?", wordInfo[CSV_COL_N_PHR])
+		    printOrNot(maskedPhrase, dontPrint=dontQuiz)
+		else:
+			printOrNot(wordInfo[CSV_COL_N_PHR], dontPrint=dontQuiz)
+
+	# related
+	if related and len(wordInfo[CSV_COL_N_REL])>0:
+		printOrNot("-> " + " " + wordInfo[CSV_COL_N_REL], dontPrint=dontQuiz)
+
+	# register
+	if register and len(wordInfo[CSV_COL_N_REG])>0:
+		printOrNot(wordInfo[CSV_COL_N_REG], dontPrint=dontQuiz)
 
 
 
 # given noun and its true gender(s) in a list
 # solicit and assess user input of gender(s)
-def genderQuizSingleWord(wordInfo):
+# dontQuiz: boolean; if True, don't quiz user; just run thru in background (for testing purpose)
+def genderQuizSingleWord(wordInfo, dontQuiz):
 
 	quizWord = wordInfo[CSV_COL_N_WORD]
 	posFull = wordInfo[CSV_COL_N_POS]
@@ -337,38 +351,38 @@ def genderQuizSingleWord(wordInfo):
 	remainingTrials = 3
 
 	# display word
-	print("\n* * * * * * * * * * * * * * * * * *\n")
-	displayWord(wordInfo, maskGender=True, maskWordInPhrase=False, word=True, freq=True, phrases=True, related=True, register=True)
-	print(" ")
+	printOrNot("\n* * * * * * * * * * * * * * * * * *\n", dontQuiz)
+	displayWord(wordInfo, maskGender=True, maskWordInPhrase=False, word=True, freq=True, phrases=True, related=True, register=True, dontQuiz=dontQuiz)
+	printOrNot(" ", dontQuiz)
 
 
 	# TODO: play pronuncation of the word (optional? indicated by keyboard input?)
-
-	while remainingTrials > 0:
-		remainingTrials -=1
-		# solicit input
-		currentInput = getGenderFromKeyboard()
-		# assess input
-		currentAssess = assessGenderInput(currentInput, genderTruth)
-		if currentAssess:
-			print("Très bien!")
-			return
-		else:
-			if remainingTrials>0:
-				print("{0} trials left.".format(remainingTrials))
+	if not dontQuiz:
+		while remainingTrials > 0:
+			remainingTrials -=1
+			# solicit input
+			currentInput = getGenderFromKeyboard()
+			# assess input
+			currentAssess = assessGenderInput(currentInput, genderTruth)
+			if currentAssess:
+				print("Très bien!")
+				return
 			else:
-				# reveal correct answer
-				correctAnswer = formatAnswer(genderTruth)
-				print("Correct answer: {0}".format(correctAnswer))
+				if remainingTrials>0:
+					print("{0} trials left.".format(remainingTrials))
+				else:
+				    # reveal correct answer
+				    correctAnswer = formatAnswer(genderTruth)
+				    print("Correct answer: {0}".format(correctAnswer))
 
 
 # given a list of words and their corresponding POS
 # each word is a string; each POS is a string too
 # run gender quiz for nouns for which gender info is available in their POS
-def genderQuizWordList(wordRows):
+def genderQuizWordList(wordRows, dontQuiz):
 
 	for i in range(len(wordRows)):
-		genderQuizSingleWord(wordRows[i])
+		genderQuizSingleWord(wordRows[i], dontQuiz)
 
 
 # given a list of POS (specifically, lstPOS from getWordInfofromCSV)
@@ -455,7 +469,7 @@ def initializeDict(csvname, nounGenderQuiz):
 # main wrapper function
 # given a csv file, run noun gender quiz through its words
 # if size is specified as an integer (must be <= # words), do random sampling
-def genderQuizMain(csvname, size=None):
+def genderQuizMain(csvname, size=None, dontQuiz=False):
 
 	dictRows = initializeDict(csvname, nounGenderQuiz=True)
 
@@ -471,9 +485,10 @@ def genderQuizMain(csvname, size=None):
 	
 	# run quiz through list
 	printInputInfo()
-	genderQuizWordList(dictRows)
+	genderQuizWordList(dictRows, dontQuiz)
 
 	print("\n~ La Fin ~\n")
+	printOrNot("All words passed testing.\n", dontPrint=(not dontQuiz))
 
 
 # inputStr: a string of word(s), separated by "; "
@@ -503,7 +518,7 @@ def genderQuizSelect(csvname, inputStr):
 		
 		# run quiz through list
 		printInputInfo()
-		genderQuizWordList(inputWordRows)
+		genderQuizWordList(inputWordRows, dontQuiz=False)
 
 		print("\n~ La Fin ~\n")
 
@@ -516,7 +531,11 @@ def genderQuizSelect(csvname, inputStr):
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "rouge") 
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci") 
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci; coucou; Londres") 
-genderQuizMain(CSV_PATH+CSV_FILENAME, QUIZ_SIZE)
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "primaire") 
+#genderQuizSelect(CSV_PATH+CSV_FILENAME, "noir") 
+genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=QUIZ_SIZE, dontQuiz=False)
+#genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=QUIZ_SIZE, dontQuiz=True)
+#genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=None, dontQuiz=True)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
