@@ -280,14 +280,18 @@ def formatPOSnMean(posStr, meanStr, maskGender):
 
 # wordInfo: a list
 # maskGender: if True, mask gender of nouns
-# freq, phrases, related, register: boolean values
-def displayWord(wordInfo, maskGender, freq, phrases, related, register):
+# maskWordInPhrase: if True, mask the word itself in $phrase and show "?" instead
+# word, freq, phrases, related, register: boolean values
+# freq only makes a difference if word is True
+# maskWordInPhrase only makes a difference if phrases if True
+def displayWord(wordInfo, maskGender, maskWordInPhrase, word, freq, phrases, related, register):
     
     # word [freq]
-    if freq and len(wordInfo[CSV_COL_N_FREQ])>0:
-    	print(wordInfo[CSV_COL_N_WORD] + " #" + wordInfo[CSV_COL_N_FREQ] + "\n")
-    else:
-    	print(wordInfo[CSV_COL_N_WORD] + "\n")
+    if word:
+    	if freq and len(wordInfo[CSV_COL_N_FREQ])>0:
+    		print(wordInfo[CSV_COL_N_WORD] + " #" + wordInfo[CSV_COL_N_FREQ] + "\n")
+    	else:
+    		print(wordInfo[CSV_COL_N_WORD] + "\n")
 
     # variation
     # only print if not "" (otherwise it'd look like there's a blank line)
@@ -299,7 +303,11 @@ def displayWord(wordInfo, maskGender, freq, phrases, related, register):
 
     # phrases
     if phrases and len(wordInfo[CSV_COL_N_PHR])>0:
-    	print(wordInfo[CSV_COL_N_PHR])
+    	if maskWordInPhrase:
+    		# mask word in $phrases with ?
+    		maskedPhrase = re.sub(wordInfo[CSV_COL_N_WORD], "?", wordInfo[CSV_COL_N_PHR])
+    	else:
+    		print(wordInfo[CSV_COL_N_PHR])
 
     # related
     if related and len(wordInfo[CSV_COL_N_REL])>0:
@@ -325,7 +333,7 @@ def genderQuizSingleWord(wordInfo):
 
 	# display word
 	print("\n* * * * * * * * * * * * * * * * * *\n")
-	displayWord(wordInfo, maskGender=True, freq=True, phrases=True, related=True, register=True)
+	displayWord(wordInfo, maskGender=True, maskWordInPhrase=False, word=True, freq=True, phrases=True, related=True, register=True)
 	print(" ")
 
 
