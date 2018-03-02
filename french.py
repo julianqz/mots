@@ -466,9 +466,26 @@ def initializeDict(csvname, nounGenderQuiz):
 
 	return dictRows
 
+# given a list representing rows of databse, and an integer size
+# randomly sample rows of database
+# returns a list containing sampled rows
+# will trigger an exit if sampling size is bigger than total number of rows present
+def sampleDict(dictRows, size):
+
+	try:
+		randIdx = sample(list(range(len(dictRows))), k=size)
+		dictRows = [dictRows[i] for i in randIdx]
+	except:
+		sys.exit("size must be >0 & <= {0}".format(len(dictRows)) + ". Exited")
+
+	return dictRows
+
+
 # main wrapper function
 # given a csv file, run noun gender quiz through its words
 # if size is specified as an integer (must be <= # words), do random sampling
+# dontQuiz: if True, run parsing etc in background but don't solicit user input.
+#           this allows running through all the words to see if there's any problem
 def genderQuizMain(csvname, size=None, dontQuiz=False):
 
 	dictRows = initializeDict(csvname, nounGenderQuiz=True)
@@ -476,12 +493,7 @@ def genderQuizMain(csvname, size=None, dontQuiz=False):
 	# random sampling
 	# only nouns are sampled
 	if size is not None:
-		try:
-			randIdx = sample(list(range(len(dictRows))), k=size)
-			dictRows = [dictRows[i] for i in randIdx]
-		except:
-			print("size must be >0 & <= {0}".format(len(nounIdx)))
-			return
+		dictRows = sampleDict(dictRows, size)
 	
 	# run quiz through list
 	printInputInfo()
@@ -491,12 +503,10 @@ def genderQuizMain(csvname, size=None, dontQuiz=False):
 	printOrNot("All words passed testing.\n", dontPrint=(not dontQuiz))
 
 
-# inputStr: a string of word(s), separated by "; "
-# e.g. "solution; rôti; viande"
-def genderQuizSelect(csvname, inputStr):
-
-	dictRows = initializeDict(csvname, nounGenderQuiz=True)
-	dictLst = [row[CSV_COL_N_WORD] for row in dictRows]
+# given a input string of word(s), separated by "; "
+# check if each one is in dictList, a list of words in the database
+# returns: 2 lists containing strings (could be empty), inputLstIn and inputLstOut
+def checkInputWordStr(inputStr, dictList):
 
 	inputLst = inputStr.split("; ")
 
@@ -504,7 +514,19 @@ def genderQuizSelect(csvname, inputStr):
 	boolLst = [item in dictLst for item in inputLst]
 	inputLstIn = [inputLst[idx] for idx in range(len(boolLst)) if boolLst[idx]]
 	inputLstOut = [inputLst[idx] for idx in range(len(boolLst)) if not boolLst[idx]]
-	
+
+	return inputLstIn, inputLstOut
+
+
+# inputStr: a string of word(s), separated by "; "
+# e.g. "solution; rôti; viande"
+def genderQuizSelect(csvname, inputStr):
+
+	dictRows = initializeDict(csvname, nounGenderQuiz=True)
+	dictLst = [row[CSV_COL_N_WORD] for row in dictRows]
+
+	inputLstIn, inputLstOut = checkInputWordStr(inputStr, dictLst)
+
 	# notify user
 	if len(inputLstOut)>0:
 		print("\nWord(s) not in database and hence skipped:\n")
@@ -522,6 +544,49 @@ def genderQuizSelect(csvname, inputStr):
 
 		print("\n~ La Fin ~\n")
 
+# given a csv file, run meaning to word quiz through its words
+# if size is specified as an integer (must be <= # words), do random sampling
+def m2wQuizMain(csvname, size=None):
+
+	dictRows = initializeDict(csvname, nounGenderQuiz=False)
+
+	# random sampling
+	# only nouns are sampled
+	if size is not None:
+		dictRows = sampleDict(dictRows, size)
+	
+	# run quiz through list
+	#printInputInfo() #* TODO: new function
+	#genderQuizWordList(dictRows, dontQuiz) #* TODO: new function
+
+	print("\n~ La Fin ~\n")
+
+
+# inputStr: a string of word(s), separated by "; "
+# e.g. "solution; rôti; viande"
+def m2wQuizSelect(csvname, inputStr):
+
+	dictRows = initializeDict(csvname, nounGenderQuiz=False)
+	dictLst = [row[CSV_COL_N_WORD] for row in dictRows]
+
+	inputLstIn, inputLstOut = checkInputWordStr(inputStr, dictLst)
+
+	# notify user
+	if len(inputLstOut)>0:
+		print("\nWord(s) not in database and hence skipped:\n")
+		for word in inputLstOut:
+			print(word)
+
+	# for words that are in database
+	if len(inputLstIn)>0:
+		# get rows from database corresponding to these words
+		inputWordRows = [dictRows[dictLst.index(word)] for word in inputLstIn]
+		
+		# run quiz through list
+		#printInputInfo() #* TODO: new function
+		#genderQuizWordList(inputWordRows, dontQuiz=False) #* TODO: new function
+
+		print("\n~ La Fin ~\n")
 
 # run
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "blah; fromage; euro")
@@ -535,7 +600,7 @@ def genderQuizSelect(csvname, inputStr):
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "noir") 
 genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=QUIZ_SIZE, dontQuiz=False)
 #genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=QUIZ_SIZE, dontQuiz=True)
-#genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=None, dontQuiz=True)
+#genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=None, dontQuiz=True) # thru-train test on all words
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
