@@ -223,18 +223,23 @@ def parseMeaning(toParse):
         return [toParse]
 
 
-# posStr: a string of POS(s); like "nm", "adj; nm/nf"
-# meanStr: a string of meaning(s); like "blue", "bright; shiny", "{bright}; {blue}"
+# wordInfo: a list representing a row corresponding to a word in CSV
 # maskGender: boolean value; if True, mask gender of nouns
 # no return; prints formatted/aligned/padded POS + meaning
-def formatPOSnMean(posStr, meanStr, maskGender):
+def formatPOSnMean(wordInfo, maskGender):
+	word = wordInfo[CSV_COL_N_WORD]
+	# posStr: a string of POS(s); like "nm", "adj; nm/nf"
+	posStr = wordInfo[CSV_COL_N_POS]
+	# meanStr: a string of meaning(s); like "blue", "bright; shiny", "{bright}; {blue}"
+	meanStr = wordInfo[CSV_COL_N_MEAN]
+
 	posList = parsePos(posStr)
 	meanList = parseMeaning(meanStr)
 	nPos = len(posList)
 
 	# sanity check
 	if not len(posList)==len(meanList):
-		sys.exit("Lengths of POS and meanings do not match. Check CSV. Exited.")
+		sys.exit("{0}: lengths of POS and meanings do not match. Check CSV. Exited.".format(word))
 
 	# find POS that are nouns
 	nounIdx = [idx for idx in range(nPos) if posList[idx][0]=="n"]
@@ -299,7 +304,7 @@ def displayWord(wordInfo, maskGender, maskWordInPhrase, word, freq, phrases, rel
     	print(wordInfo[CSV_COL_N_VAR])
     
     # align/format POS and meaning
-    formatPOSnMean(wordInfo[CSV_COL_N_POS], wordInfo[CSV_COL_N_MEAN], maskGender)
+    formatPOSnMean(wordInfo, maskGender)
 
     # phrases
     if phrases and len(wordInfo[CSV_COL_N_PHR])>0:
