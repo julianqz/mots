@@ -105,6 +105,10 @@ def downloadFile(url, filename, fileDest):
 		print("{0} already exists. No downloading performed.".format(filename))
 	else:
 		try:
+			# refs: 
+			# https://stackoverflow.com/questions/38489386/python-requests-403-forbidden
+			# https://stackoverflow.com/questions/39128738/downloading-a-song-through-python-requests
+			
 			result = requests.get(url, headers=HTTP_HEADER)
 
 			# w: open for writing, truncating the file first
