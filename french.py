@@ -7,7 +7,7 @@ from random import sample
 
 # meta parameters
 QUIZ_SIZE = 5
-CSV_PATH = "/Users/jkewz/Desktop/fr/"
+CSV_PATH = "/Users/jkewz/Dropbox (Personal)/french/fr/"
 CSV_FILENAME = "mots.csv"
 
 CSV_COL_FREQ = "frequency_rank"
@@ -598,9 +598,9 @@ def m2wQuizSelect(csvname, inputStr):
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "merci; coucou; Londres") 
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "primaire") 
 #genderQuizSelect(CSV_PATH+CSV_FILENAME, "noir") 
-genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=QUIZ_SIZE, dontQuiz=False)
+#genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=QUIZ_SIZE, dontQuiz=False)
 #genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=QUIZ_SIZE, dontQuiz=True)
-#genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=None, dontQuiz=True) # thru-train test on all words
+genderQuizMain(csvname=CSV_PATH+CSV_FILENAME, size=None, dontQuiz=True) # thru-train test on all words
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_PATH+CSV_FILENAME)
 #genderQuizMain(CSV_FILENAME, QUIZ_SIZE)
